@@ -19,5 +19,7 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Chưa sửa, để bước kiểm tra Lighthouse cuối cùng, nếu bị báo thì đổi sang màu đậm hơn (vd #15803d, #b45309).
 - SwipeDeck.jsx: đang đứng ở nút quẹt mà bấm tới thẻ cuối thì nút bị mờ (disabled), người dùng bàn phím bị mất chỗ đang đứng.
   Chưa sửa vì lỗi nhẹ, vẫn dùng phím mũi tên và Backspace được.
+- SwipeDeck.jsx: hoàn tác một thẻ, DELETE đang chờ thì quẹt lại đúng thẻ đó, nếu DELETE lỗi thì code bỏ qua việc trả thẻ lại nên server còn 2 bản ghi cho cùng một người trong khi giao diện chỉ có 1.
+  Chưa sửa vì rất hiếm gặp (phải vừa lỗi mạng vừa bấm thật nhanh) và không làm sai điểm hay thẻ trên giao diện.
 
 ## HW3 - Esports Fair-Play Appeal Tribunal
