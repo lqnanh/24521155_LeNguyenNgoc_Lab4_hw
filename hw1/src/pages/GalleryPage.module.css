@@ -1,0 +1,46 @@
+.title {
+  margin: 0.67em 0 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filterButton {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f2937;
+  font: inherit;
+  cursor: pointer;
+}
+
+.filterButton:hover {
+  background: #f3f4f6;
+}
+
+.filterButton:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.filterButton[aria-pressed='true'] {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.count {
+  margin: 0 0 1rem;
+  color: #4b5563;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
