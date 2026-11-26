@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import Card from './Card.jsx';
+import { calculateScore, formatPoints, getPoints } from '../scoring.js';
 import styles from './SwipeDeck.module.css';
 
 const KEY_TO_ACTION = {
@@ -37,7 +38,7 @@ function isTypingTarget(target) {
 
 const initialState = {
   swipes: [], // chồng đĩa: phần tử cuối là lần quẹt mới nhất
-  undoneProfileId: null, // người vừa được hoàn tác (để hiện thông báo)
+  undoneSwipe: null, // lần quẹt vừa được hoàn tác (để hiện thông báo)
 };
 
 function deckReducer(state, command) {
@@ -45,12 +46,12 @@ function deckReducer(state, command) {
     case 'swipe': {
       const swipes = appendSwipe(state.swipes, command.profiles, command.action);
       if (swipes === state.swipes) return state; // hết người
-      return { swipes, undoneProfileId: null };
+      return { swipes, undoneSwipe: null };
     }
     case 'undo': {
       if (state.swipes.length === 0) return state; // chưa quẹt gì
       const top = state.swipes.at(-1); // lấy đĩa trên cùng ra
-      return { swipes: state.swipes.slice(0, -1), undoneProfileId: top.profileId };
+      return { swipes: state.swipes.slice(0, -1), undoneSwipe: top };
     }
     default:
       return state;
@@ -59,23 +60,28 @@ function deckReducer(state, command) {
 
 export default function SwipeDeck({ profiles = [] }) {
   const [state, dispatch] = useReducer(deckReducer, initialState);
-  const { swipes, undoneProfileId } = state;
+  const { swipes, undoneSwipe } = state;
 
-  // Tính ra mỗi lần vẽ lại, không lưu thành state riêng
+  // Tất cả tính ra mỗi lần vẽ lại, không lưu thành state riêng
   const remainingProfiles = getRemainingProfiles(profiles, swipes);
   const currentProfile = remainingProfiles[0] ?? null;
+  const score = calculateScore(swipes);
 
   const canSwipe = currentProfile !== null;
   const canUndo = swipes.length > 0;
 
   const lastSwipe = swipes.at(-1);
-  const findProfile = (id) => profiles.find((profile) => profile._id === id);
+  const findName = (id) => profiles.find((profile) => profile._id === id)?.name ?? '';
 
+  // Một dòng thông báo duy nhất cho trình đọc màn hình (gồm cả điểm),
+  // nên không bị đọc 2 lần
   let statusText = '';
-  if (undoneProfileId) {
-    statusText = `Đã hoàn tác: ${findProfile(undoneProfileId)?.name ?? ''}`;
+  if (undoneSwipe) {
+    const points = -getPoints(undoneSwipe.action);
+    statusText = `Đã hoàn tác: ${findName(undoneSwipe.profileId)} (${formatPoints(points)} điểm). Tổng: ${score} điểm.`;
   } else if (lastSwipe) {
-    statusText = `Vừa ${ACTION_LABEL[lastSwipe.action]}: ${findProfile(lastSwipe.profileId)?.name ?? ''}`;
+    const points = getPoints(lastSwipe.action);
+    statusText = `Vừa ${ACTION_LABEL[lastSwipe.action]}: ${findName(lastSwipe.profileId)} (${formatPoints(points)} điểm). Tổng: ${score} điểm.`;
   }
 
   // Cách quẹt dùng chung cho phím, kéo thẻ và nút bấm
@@ -116,6 +122,11 @@ export default function SwipeDeck({ profiles = [] }) {
 
   return (
     <section className={styles.deck} aria-label="Bộ thẻ">
+      {/* Không đặt aria-live ở đây: dòng status bên dưới đã đọc điểm rồi */}
+      <p className={styles.score}>
+        Điểm: <span className={styles.scoreValue}>{score}</span>
+      </p>
+
       <p className={styles.hint}>
         Kéo thẻ hoặc bấm phím: ← Bỏ qua · → Thích · ↑ Siêu thích · Backspace Hoàn tác
       </p>
@@ -173,7 +184,7 @@ export default function SwipeDeck({ profiles = [] }) {
       </p>
 
       <p className={styles.count}>
-        Đã quẹt {swipes.length}/{profiles.length}
+        Còn {remainingProfiles.length}/{profiles.length}
       </p>
     </section>
   );

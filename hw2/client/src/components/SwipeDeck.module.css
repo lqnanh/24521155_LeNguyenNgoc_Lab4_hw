@@ -8,6 +8,19 @@
   gap: 1rem;
 }
 
+/* Điểm ở trên thẻ */
+.score {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.scoreValue {
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums; /* số đổi không làm chữ nhảy qua lại */
+}
+
 .hint,
 .status,
 .count {
