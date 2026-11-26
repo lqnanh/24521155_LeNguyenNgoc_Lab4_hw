@@ -21,5 +21,7 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Chưa sửa vì lỗi nhẹ, vẫn dùng phím mũi tên và Backspace được.
 - SwipeDeck.jsx: hoàn tác một thẻ, DELETE đang chờ thì quẹt lại đúng thẻ đó, nếu DELETE lỗi thì code bỏ qua việc trả thẻ lại nên server còn 2 bản ghi cho cùng một người trong khi giao diện chỉ có 1.
   Chưa sửa vì rất hiếm gặp (phải vừa lỗi mạng vừa bấm thật nhanh) và không làm sai điểm hay thẻ trên giao diện.
+- SwipeDeck.jsx (bước 11): code coi "không tìm thấy lần quẹt trong danh sách" là đã hoàn tác rồi gọi DELETE, nên khi thêm nút Chơi lại thì các lần quẹt đang chờ server sẽ bị xoá nhầm trên server.
+  Sửa: ở bước 12 ghi rõ các lần hoàn tác lúc đang chờ vào undoneWhilePendingRef và đánh dấu ván cũ bằng roundStartRef, không đoán nữa.
 
 ## HW3 - Esports Fair-Play Appeal Tribunal
