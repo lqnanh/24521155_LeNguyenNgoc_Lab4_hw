@@ -7,4 +7,9 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
 
 ## HW2 - Card-Swipe Deck "Hen Ho Nhung Khong Yeu"
 
+- server.js: thiếu MONGODB_URI thì AI dùng process.exit(1), sai rule thiếu thì throw lỗi.
+  Sửa: đổi thành throw new Error('MONGODB_URI missing').
+- server.js: lỗi 4xx khác 400 (vd 413) đều báo là Lỗi máy chủ, dễ hiểu nhầm.
+  Chưa sửa vì lỗi nhẹ, mã lỗi trả về vẫn đúng.
+
 ## HW3 - Esports Fair-Play Appeal Tribunal
