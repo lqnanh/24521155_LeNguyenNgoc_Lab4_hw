@@ -27,4 +27,31 @@
 - dùng được bằng bàn phím (tab, enter, esc)
 - lighthouse đo bản build, cố gắng 100
 
+## hw2 - hẹn hò nhưng không yêu
+### server
+- express + mongoose 8 (ko lên 9), async/await hết, ko callback kiểu cũ
+- chuỗi kết nối db lấy từ process.env.MONGODB_URI, thiếu thì throw lỗi luôn
+- dùng 127.0.0.1 chứ ko dùng localhost trong MONGODB_URI (localhost bị lỗi ::1)
+- mongoose.connect ko thêm useNewUrlParser, useUnifiedTopology
+- cors chỉ cho CLIENT_ORIGIN, ko cors() mở hết
+- .env ko commit, có .env.example
+- api:
+  - GET /api/profiles -> list profile, dùng .lean()
+  - POST /api/swipe { profileId, action } -> 201, sai thì 400 { error }
+  - DELETE /api/swipe/:id -> để hoàn tác, ko thấy thì 404
+- action chỉ có NOPE, LIKE, SUPERLIKE
+- route nào cũng try/catch, route ko có thì trả 404 json
+
+### client
+- url server lấy từ import.meta.env.VITE_API_URL
+- fetch trong useEffect phải có AbortController
+- phím: ← bỏ qua, → thích, ↑ siêu thích, Backspace hoàn tác
+- kéo thẻ bằng pointer event, lệch quá 50px mới tính
+- có nút bấm cho người ko dùng phím/kéo, nút icon có aria-label
+- hoàn tác dùng stack (LIFO), bỏ cái cuối ra
+- điểm tính từ history luôn (LIKE +10, SUPERLIKE +25, NOPE -5), ko để trong useState, ko useEffect
+- thẻ đang hiện cũng tính lúc render
+- lỗi gọi api hiện role="alert"
+- màn 375px ko cuộn ngang
+
 
