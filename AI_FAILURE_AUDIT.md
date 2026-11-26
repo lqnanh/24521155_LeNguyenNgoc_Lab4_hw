@@ -33,4 +33,4 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
 - computeMatrix.js: án nhẹ hơn vi phạm (chênh lệch âm, vd TanVuu -2) vẫn kết luận là Tương xứng, dễ hiểu nhầm.
   Chưa sửa vì bảng chỉ dùng để xem án có nặng quá không (phục vụ kháng cáo), cột chênh lệch vẫn ghi rõ "Nhẹ hơn 2 mức".
 - InputField.jsx: chỗ báo lỗi chỉ là thẻ p thường, thiếu role="alert" như code mẫu slide 25, nên lỗi hiện ra lúc rời ô thì trình đọc màn hình không tự đọc.
-  Chưa sửa vì lỗi nhẹ, lỗi vẫn được đọc khi quay lại ô đó (aria-describedby) và khi bấm gửi con trỏ nhảy tới ô sai đầu tiên.
+  Sửa: ở bước 6 thêm role="alert" cho chỗ báo lỗi dưới mỗi ô.
