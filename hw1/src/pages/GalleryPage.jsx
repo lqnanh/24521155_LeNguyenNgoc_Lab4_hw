@@ -1,8 +1,9 @@
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { CATEGORIES, photos } from '../data/photos.js';
 import styles from './GalleryPage.module.css';
 
 const FILTERS = [{ slug: null, label: 'Tất cả' }, ...CATEGORIES];
+const EAGER_COUNT = 4;
 
 export default function GalleryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +29,12 @@ export default function GalleryPage() {
     });
   }
 
+  function photoLink(photoId) {
+    const next = new URLSearchParams(searchParams);
+    next.set('photoId', photoId);
+    return { pathname: '/gallery', search: `?${next}` };
+  }
+
   return (
     <>
       <h1 className={styles.title}>Thư viện ảnh</h1>
@@ -50,9 +57,22 @@ export default function GalleryPage() {
         Đang hiện {visiblePhotos.length} ảnh
       </p>
 
-      <ul className={styles.list}>
-        {visiblePhotos.map((photo) => (
-          <li key={photo.id}>{photo.title}</li>
+      <ul className={styles.grid}>
+        {visiblePhotos.map((photo, position) => (
+          <li key={photo.id}>
+            <Link to={photoLink(photo.id)} className={styles.card}>
+              <img
+                src={photo.src}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                loading={position < EAGER_COUNT ? 'eager' : 'lazy'}
+                decoding="async"
+                className={styles.image}
+              />
+              <span className={styles.caption}>{photo.title}</span>
+            </Link>
+          </li>
         ))}
       </ul>
     </>
