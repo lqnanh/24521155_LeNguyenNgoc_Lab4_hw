@@ -13,5 +13,7 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Chưa sửa vì lỗi nhẹ, mã lỗi trả về vẫn đúng.
 - models/Profile.js: kiểm tra avatar chỉ xem có chứa emoji hay không, nên chuỗi như abc😀 vẫn lọt qua dù báo lỗi là phải là emoji.
   Chưa sửa vì lỗi nhẹ, dữ liệu profile do file seed tự thêm chứ người dùng không gửi lên.
+- client/hooks/useProfiles.js: thiếu VITE_API_URL thì throw ngay khi nạp file, trang trắng trơn, lỗi chỉ hiện trong console chứ không hiện trên trang.
+  Chưa sửa vì chỉ xảy ra khi quên tạo file .env lúc cài đặt, người dùng thật không gặp.
 
 ## HW3 - Esports Fair-Play Appeal Tribunal
