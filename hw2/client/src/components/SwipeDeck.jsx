@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Card from './Card.jsx';
+import { createSwipe, deleteSwipe } from '../api.js';
 import { calculateScore, formatPoints, getPoints } from '../scoring.js';
 import styles from './SwipeDeck.module.css';
 
@@ -22,10 +23,15 @@ function getRemainingProfiles(profiles, swipes) {
 }
 
 // Thêm một lần quẹt cho người tiếp theo. Hết người thì giữ nguyên.
-function appendSwipe(prevSwipes, profiles, action) {
+// serverId = null nghĩa là server chưa trả _id về.
+function appendSwipe(prevSwipes, profiles, action, localId) {
   const [next] = getRemainingProfiles(profiles, prevSwipes);
   if (!next) return prevSwipes;
-  return [...prevSwipes, { profileId: next._id, action }];
+  return [...prevSwipes, { localId, profileId: next._id, action, serverId: null }];
+}
+
+function findEntry(state, localId) {
+  return state.swipes.find((swipe) => swipe.localId === localId) ?? null;
 }
 
 // Đang gõ chữ trong ô nhập thì không bắt phím
@@ -37,15 +43,31 @@ function isTypingTarget(target) {
 }
 
 const initialState = {
-  swipes: [], // chồng đĩa: phần tử cuối là lần quẹt mới nhất
+  // Chồng đĩa: phần tử cuối là lần quẹt mới nhất.
+  // Mỗi phần tử: { localId, profileId, action, serverId }
+  swipes: [],
   undoneSwipe: null, // lần quẹt vừa được hoàn tác (để hiện thông báo)
 };
 
 function deckReducer(state, command) {
   switch (command.type) {
     case 'swipe': {
-      const swipes = appendSwipe(state.swipes, command.profiles, command.action);
+      const swipes = appendSwipe(state.swipes, command.profiles, command.action, command.localId);
       if (swipes === state.swipes) return state; // hết người
+      return { swipes, undoneSwipe: null };
+    }
+    case 'saved': {
+      // Server trả _id về: gắn vào đúng lần quẹt đó
+      if (!findEntry(state, command.localId)) return state;
+      const swipes = state.swipes.map((swipe) =>
+        swipe.localId === command.localId ? { ...swipe, serverId: command.serverId } : swipe
+      );
+      return { ...state, swipes };
+    }
+    case 'remove': {
+      // POST lỗi: bỏ lần quẹt đó ra, thẻ quay lại
+      if (!findEntry(state, command.localId)) return state;
+      const swipes = state.swipes.filter((swipe) => swipe.localId !== command.localId);
       return { swipes, undoneSwipe: null };
     }
     case 'undo': {
@@ -53,13 +75,27 @@ function deckReducer(state, command) {
       const top = state.swipes.at(-1); // lấy đĩa trên cùng ra
       return { swipes: state.swipes.slice(0, -1), undoneSwipe: top };
     }
+    case 'restore': {
+      // DELETE lỗi: đặt lần quẹt trở lại đúng chỗ cũ trong chồng
+      const { entry } = command;
+      const alreadySwiped = state.swipes.some((swipe) => swipe.profileId === entry.profileId);
+      if (alreadySwiped) return state;
+      const swipes = [...state.swipes, entry].sort((a, b) => a.localId - b.localId);
+      return { swipes, undoneSwipe: null };
+    }
     default:
       return state;
   }
 }
 
 export default function SwipeDeck({ profiles = [] }) {
-  const [state, dispatch] = useReducer(deckReducer, initialState);
+  // stateRef luôn giữ trạng thái mới nhất, đọc được ngay trong hàm xử lý.
+  // state là bản sao để React vẽ lại màn hình.
+  const stateRef = useRef(initialState);
+  const [state, setState] = useState(initialState);
+  const nextLocalIdRef = useRef(1);
+  const [error, setError] = useState(null);
+
   const { swipes, undoneSwipe } = state;
 
   // Tất cả tính ra mỗi lần vẽ lại, không lưu thành state riêng
@@ -84,13 +120,69 @@ export default function SwipeDeck({ profiles = [] }) {
     statusText = `Vừa ${ACTION_LABEL[lastSwipe.action]}: ${findName(lastSwipe.profileId)} (${formatPoints(points)} điểm). Tổng: ${score} điểm.`;
   }
 
-  // Cách quẹt dùng chung cho phím, kéo thẻ và nút bấm
-  const swipe = useCallback(
-    (action) => dispatch({ type: 'swipe', action, profiles }),
-    [profiles]
+  // Chạy reducer ngay trên trạng thái mới nhất, rồi báo React vẽ lại
+  const apply = useCallback((command) => {
+    const next = deckReducer(stateRef.current, command);
+    if (next !== stateRef.current) {
+      stateRef.current = next;
+      setState(next);
+    }
+    return next;
+  }, []);
+
+  // Xoá trên server. 404 = server đã không còn bản ghi, coi như xoá xong.
+  const deleteOnServer = useCallback(
+    async (entry) => {
+      try {
+        await deleteSwipe(entry.serverId);
+      } catch (err) {
+        if (err.status === 404) return;
+        setError(`Không hoàn tác được. ${err.message}`);
+        apply({ type: 'restore', entry });
+      }
+    },
+    [apply]
   );
 
-  const undo = useCallback(() => dispatch({ type: 'undo' }), []);
+  // Cách quẹt dùng chung cho phím, kéo thẻ và nút bấm
+  const swipe = useCallback(
+    async (action) => {
+      const localId = nextLocalIdRef.current++;
+      const before = stateRef.current;
+      const after = apply({ type: 'swipe', action, profiles, localId });
+      if (after === before) return; // hết người
+
+      setError(null); // quẹt tiếp thì ẩn lỗi cũ
+      const entry = after.swipes.at(-1);
+
+      try {
+        const saved = await createSwipe({ profileId: entry.profileId, action });
+
+        if (findEntry(stateRef.current, localId)) {
+          apply({ type: 'saved', localId, serverId: saved._id });
+        } else {
+          // Đã bị hoàn tác trong lúc chờ server: giờ mới có _id thì xoá luôn
+          deleteOnServer({ ...entry, serverId: saved._id });
+        }
+      } catch (err) {
+        // Đã hoàn tác rồi thì lỗi này không còn quan trọng
+        if (!findEntry(stateRef.current, localId)) return;
+        apply({ type: 'remove', localId });
+        setError(`Không lưu được lượt quẹt. ${err.message}`);
+      }
+    },
+    [profiles, apply, deleteOnServer]
+  );
+
+  const undo = useCallback(() => {
+    const top = stateRef.current.swipes.at(-1);
+    if (!top) return;
+
+    apply({ type: 'undo' }); // thẻ quay lại ngay
+
+    // Có _id rồi thì xoá ngay. Chưa có thì swipe() sẽ tự xoá khi server trả về.
+    if (top.serverId) deleteOnServer(top);
+  }, [apply, deleteOnServer]);
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -130,6 +222,20 @@ export default function SwipeDeck({ profiles = [] }) {
       <p className={styles.hint}>
         Kéo thẻ hoặc bấm phím: ← Bỏ qua · → Thích · ↑ Siêu thích · Backspace Hoàn tác
       </p>
+
+      {error && (
+        <div role="alert" className={styles.error}>
+          <p className={styles.errorText}>{error}</p>
+          <button
+            type="button"
+            className={styles.closeButton}
+            aria-label="Đóng thông báo lỗi"
+            onClick={() => setError(null)}
+          >
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+      )}
 
       {currentProfile ? (
         <Card key={currentProfile._id} profile={currentProfile} onSwipe={swipe} />

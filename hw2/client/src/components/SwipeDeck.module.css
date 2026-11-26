@@ -40,6 +40,53 @@
   text-align: center;
 }
 
+/* Thông báo lỗi */
+.error {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-radius: 0.75rem;
+  background: #fde8e8;
+  color: #9b1c1c;
+}
+
+.errorText {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.closeButton {
+  flex: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px: đủ to cho ngón tay */
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.closeButton:hover {
+  background: rgb(155 28 28 / 0.1);
+}
+
+.closeButton:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* Hàng nút */
 .actions {
   display: flex;
