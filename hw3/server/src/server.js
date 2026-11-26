@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import Player from './models/Player.js';
+import Appeal from './models/Appeal.js';
+import { validateAppeal } from './validateAppeal.js';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN?.replace(/\/$/, '');
@@ -18,7 +21,87 @@ app.use(cors({ origin: CLIENT_ORIGIN }));
 // Đọc dữ liệu JSON gửi lên
 app.use(express.json());
 
-// Các đường dẫn /api sẽ thêm ở bước sau
+// ===== Các đường dẫn /api =====
+
+// Giờ hiện tại của server, để trang web chỉnh đồng hồ đếm ngược
+app.get('/api/time', (req, res, next) => {
+  try {
+    res.json({ now: Date.now() });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Danh sách tuyển thủ (tóm tắt)
+app.get('/api/dossiers', async (req, res, next) => {
+  try {
+    const players = await Player.find({}, 'playerId displayName team appealDeadline -_id')
+      .sort({ displayName: 1 })
+      .lean();
+    res.json(players);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Toàn bộ hồ sơ một tuyển thủ
+app.get('/api/dossiers/:playerId', async (req, res, next) => {
+  try {
+    const playerId = req.params.playerId.toLowerCase();
+    const player = await Player.findOne({ playerId }).select('-__v').lean();
+    if (!player) {
+      return res.status(404).json({ error: `Không tìm thấy hồ sơ của tuyển thủ "${playerId}"` });
+    }
+    res.json(player);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Gửi đơn kháng cáo
+app.post('/api/dossiers/:playerId/appeals', async (req, res, next) => {
+  try {
+    const playerId = req.params.playerId.toLowerCase();
+
+    const player = await Player.findOne({ playerId }, 'appealDeadline').lean();
+    if (!player) {
+      return res.status(404).json({ error: `Không tìm thấy hồ sơ của tuyển thủ "${playerId}"` });
+    }
+
+    if (Date.now() >= new Date(player.appealDeadline).getTime()) {
+      return res.status(409).json({ error: 'Đã hết hạn kháng cáo, không thể gửi đơn' });
+    }
+
+    const errors = validateAppeal(req.body);
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    // Chỉ lấy đúng các ô cần thiết; playerId lấy từ đường dẫn, bỏ qua playerId người dùng gửi
+    const body = req.body;
+    const appeal = await Appeal.create({
+      playerId,
+      fullName: body.fullName,
+      email: body.email,
+      reason: body.reason,
+      statement: body.statement,
+      evidenceUrl: body.evidenceUrl ?? '',
+      agreed: body.agreed,
+    });
+
+    res.status(201).json(appeal);
+  } catch (err) {
+    // Phòng hờ: nếu Mongoose vẫn bắt được lỗi thì trả cùng dạng 400 { errors }
+    if (err instanceof mongoose.Error.ValidationError) {
+      const errors = {};
+      for (const [field, detail] of Object.entries(err.errors)) {
+        errors[field] = detail.message;
+      }
+      return res.status(400).json({ errors });
+    }
+    next(err);
+  }
+});
 
 // Đường dẫn không tồn tại thì trả 404 dạng JSON
 app.use((req, res) => {

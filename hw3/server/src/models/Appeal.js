@@ -1,21 +1,5 @@
 import mongoose from 'mongoose';
-
-// Danh sách lý do kháng cáo cố định (lưu mã, giao diện sẽ hiện chữ tiếng Việt)
-export const APPEAL_REASONS = [
-  'DISPROPORTIONATE_PENALTY', // Án phạt quá nặng so với mức vi phạm
-  'INSUFFICIENT_EVIDENCE', // Bằng chứng không đủ hoặc không chính xác
-  'PROCEDURAL_ERROR', // Sai quy trình xử lý kỷ luật
-  'NEW_EVIDENCE', // Có bằng chứng mới
-];
-
-function isHttpUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
+import { APPEAL_REASONS, EMAIL_PATTERN, isHttpUrl } from '../validateAppeal.js';
 
 const appealSchema = new mongoose.Schema(
   {
@@ -38,7 +22,7 @@ const appealSchema = new mongoose.Schema(
       required: [true, 'Thiếu email'],
       trim: true,
       lowercase: true,
-      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email không hợp lệ'],
+      match: [EMAIL_PATTERN, 'Email không hợp lệ'],
     },
     reason: {
       type: String,
