@@ -8,6 +8,23 @@
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
   text-align: center;
   overflow-wrap: anywhere;
+
+  /* Vị trí thẻ lấy từ biến CSS do Card.jsx đặt */
+  transform: translate(var(--drag-x, 0px), var(--drag-y, 0px))
+    rotate(var(--drag-rotate, 0deg));
+  transition: transform 0.25s ease;
+
+  /* Kéo thẻ trên điện thoại không làm trang cuộn, không bôi đen chữ */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+/* Đang kéo: tắt hiệu ứng để thẻ bám sát tay */
+.dragging {
+  transition: none;
+  cursor: grabbing;
 }
 
 .avatar {
@@ -31,4 +48,10 @@
   margin: 0;
   line-height: 1.5;
   color: #444444;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
 }

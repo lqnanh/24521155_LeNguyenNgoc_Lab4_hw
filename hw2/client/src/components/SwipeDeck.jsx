@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Card from './Card.jsx';
 import styles from './SwipeDeck.module.css';
 
@@ -18,6 +18,13 @@ const ACTION_LABEL = {
 function getRemainingProfiles(profiles, swipes) {
   const swipedIds = new Set(swipes.map((swipe) => swipe.profileId));
   return profiles.filter((profile) => !swipedIds.has(profile._id));
+}
+
+// Thêm một lần quẹt cho người tiếp theo. Hết người thì giữ nguyên.
+function appendSwipe(prevSwipes, profiles, action) {
+  const [next] = getRemainingProfiles(profiles, prevSwipes);
+  if (!next) return prevSwipes;
+  return [...prevSwipes, { profileId: next._id, action }];
 }
 
 // Đang gõ chữ trong ô nhập thì không bắt phím mũi tên
@@ -41,6 +48,15 @@ export default function SwipeDeck({ profiles = [] }) {
     ? profiles.find((profile) => profile._id === lastSwipe.profileId)
     : null;
 
+  // Cách quẹt dùng chung cho cả phím và kéo thẻ.
+  // Tính từ danh sách mới nhất (prev) nên quẹt nhanh cũng không bị trùng.
+  const swipe = useCallback(
+    (action) => {
+      setSwipes((prev) => appendSwipe(prev, profiles, action));
+    },
+    [profiles]
+  );
+
   useEffect(() => {
     function handleKeyDown(event) {
       const action = KEY_TO_ACTION[event.key];
@@ -54,25 +70,21 @@ export default function SwipeDeck({ profiles = [] }) {
       // Giữ phím thì không quẹt liên tục
       if (event.repeat) return;
 
-      // Tính người tiếp theo từ danh sách mới nhất (prev),
-      // nên bấm nhanh cũng không quẹt trùng một người
-      setSwipes((prev) => {
-        const [next] = getRemainingProfiles(profiles, prev);
-        if (!next) return prev;
-        return [...prev, { profileId: next._id, action }];
-      });
+      swipe(action);
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [profiles]);
+  }, [swipe]);
 
   return (
     <section className={styles.deck} aria-label="Bộ thẻ">
-      <p className={styles.hint}>← Bỏ qua · → Thích · ↑ Siêu thích</p>
+      <p className={styles.hint}>
+        Kéo thẻ hoặc bấm phím: ← Bỏ qua · → Thích · ↑ Siêu thích
+      </p>
 
       {currentProfile ? (
-        <Card key={currentProfile._id} profile={currentProfile} />
+        <Card key={currentProfile._id} profile={currentProfile} onSwipe={swipe} />
       ) : (
         <p className={styles.empty}>Hết người để quẹt rồi! 🎉</p>
       )}

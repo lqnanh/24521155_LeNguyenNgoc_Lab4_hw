@@ -4,6 +4,8 @@
   max-width: 40rem;
   margin: 0 auto;
   padding: 1rem;
+  /* Kéo thẻ ra mép màn hình thì cắt đi, không hiện thanh cuộn ngang */
+  overflow-x: clip;
 }
 
 .title {
