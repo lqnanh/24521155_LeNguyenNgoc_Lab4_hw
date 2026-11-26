@@ -1,10 +1,10 @@
-import { Link } from 'react-router';
-import { useDossierList } from '../hooks/useDossierList.js';
+import { Link, useOutletContext } from 'react-router';
 import { formatDateTime } from '../format.js';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
-  const { players, loading, error } = useDossierList();
+  // Dữ liệu do Layout tải sẵn (không gọi server lần nữa)
+  const { players, loading, error } = useOutletContext();
 
   return (
     <section>

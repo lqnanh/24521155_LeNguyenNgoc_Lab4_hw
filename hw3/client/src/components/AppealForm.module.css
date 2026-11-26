@@ -72,9 +72,18 @@
   background: #f0f2f5;
 }
 
-.primary:disabled,
+/* Nút bị khoá trông nhạt hơn nhưng chữ vẫn đủ tương phản (không dùng opacity) */
+.primary:disabled {
+  background: #4a6fa5; /* chữ trắng trên nền này khoảng 5,1:1 */
+  border-color: #4a6fa5;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
 .secondary:disabled {
-  opacity: 0.6;
+  background: #f0f2f5;
+  color: #4b5563; /* khoảng 6,7:1 */
+  border-color: #9ca3af;
   cursor: not-allowed;
 }
 

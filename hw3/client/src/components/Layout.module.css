@@ -3,6 +3,11 @@
   color: #ffffff;
 }
 
+/* Trên nền tối #14213d viền vàng đạt khoảng 7,9:1 */
+.header :focus-visible {
+  outline-color: #f2a900;
+}
+
 .inner {
   max-width: 960px;
   margin: 0 auto;

@@ -35,7 +35,15 @@ async function request(path, { signal, method = 'GET', body } = {}) {
     throw new ApiError('Không kết nối được máy chủ. Hãy kiểm tra server đã chạy chưa.', 0);
   }
 
-  const text = await res.text();
+  // Đọc nội dung cũng có thể hỏng giữa chừng (mất mạng) hoặc bị huỷ
+  let text;
+  try {
+    text = await res.text();
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new ApiError('Mất kết nối khi đang nhận dữ liệu từ máy chủ. Vui lòng thử lại.', 0);
+  }
+
   let data = null;
   if (text) {
     try {

@@ -7,7 +7,8 @@ function navClass({ isActive }) {
 }
 
 export default function Layout() {
-  const { players } = useDossierList();
+  // Chỉ tải danh sách 1 lần ở đây, rồi truyền xuống các trang qua Outlet context
+  const dossierList = useDossierList();
 
   return (
     <>
@@ -23,7 +24,7 @@ export default function Layout() {
                   Danh sách hồ sơ
                 </NavLink>
               </li>
-              {players.map((p) => (
+              {dossierList.players.map((p) => (
                 <li key={p.playerId}>
                   <NavLink to={`/dossier/${p.playerId}`} className={navClass}>
                     {p.displayName}
@@ -36,7 +37,7 @@ export default function Layout() {
       </header>
 
       <main className={styles.main}>
-        <Outlet />
+        <Outlet context={dossierList} />
       </main>
     </>
   );
