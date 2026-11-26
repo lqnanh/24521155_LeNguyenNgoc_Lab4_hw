@@ -27,9 +27,11 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
 ## HW3 - Esports Fair-Play Appeal Tribunal
 
 - Layout.jsx và HomePage.jsx: cả hai cùng gọi useDossierList, ở trang chủ danh sách tuyển thủ bị tải 2 lần từ server.
-  Chưa sửa vì lỗi nhẹ, chỉ tốn thêm 1 yêu cầu nhỏ, không sai dữ liệu.
+  Sửa: ở bước 7 chỉ Layout gọi useDossierList, truyền xuống trang chủ qua Outlet context (useOutletContext).
 - index.css: viền focus màu vàng #f2a900 trên nền trắng chỉ đạt khoảng 1.9:1, dưới mức 3:1 mà WCAG 2.2 AA yêu cầu cho chỉ báo focus.
-  Chưa sửa, để bước kiểm tra cuối cùng xử lý (cần một màu nhìn rõ trên cả nền trắng lẫn thanh điều hướng màu tối).
+  Sửa: ở bước 7 đổi viền focus thành xanh #0b4fb3 (khoảng 7,5:1 trên nền trắng), riêng thanh điều hướng tối giữ màu vàng.
+- AppealForm.module.css: nút bị khoá dùng opacity 0.6 làm chữ trên nút nhạt, thiếu tương phản.
+  Sửa: ở bước 7 bỏ opacity, đặt màu nền và màu chữ riêng cho nút bị khoá.
 - computeMatrix.js: án nhẹ hơn vi phạm (chênh lệch âm, vd TanVuu -2) vẫn kết luận là Tương xứng, dễ hiểu nhầm.
   Chưa sửa vì bảng chỉ dùng để xem án có nặng quá không (phục vụ kháng cáo), cột chênh lệch vẫn ghi rõ "Nhẹ hơn 2 mức".
 - InputField.jsx: chỗ báo lỗi chỉ là thẻ p thường, thiếu role="alert" như code mẫu slide 25, nên lỗi hiện ra lúc rời ô thì trình đọc màn hình không tự đọc.
