@@ -11,5 +11,7 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Sửa: đổi thành throw new Error('MONGODB_URI missing').
 - server.js: lỗi 4xx khác 400 (vd 413) đều báo là Lỗi máy chủ, dễ hiểu nhầm.
   Chưa sửa vì lỗi nhẹ, mã lỗi trả về vẫn đúng.
+- models/Profile.js: kiểm tra avatar chỉ xem có chứa emoji hay không, nên chuỗi như abc😀 vẫn lọt qua dù báo lỗi là phải là emoji.
+  Chưa sửa vì lỗi nhẹ, dữ liệu profile do file seed tự thêm chứ người dùng không gửi lên.
 
 ## HW3 - Esports Fair-Play Appeal Tribunal
