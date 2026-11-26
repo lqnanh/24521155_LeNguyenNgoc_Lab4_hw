@@ -7,6 +7,14 @@ import styles from './GalleryPage.module.css';
 const FILTERS = [{ slug: null, label: 'Tất cả' }, ...CATEGORIES];
 const EAGER_COUNT = 4;
 
+function toThumbSrc(src) {
+  const slash = src.lastIndexOf('/');
+  return `${src.slice(0, slash + 1)}thumbs/${src.slice(slash + 1)}`;
+}
+
+const GRID_SIZES =
+  '(min-width: 1200px) 230px, (min-width: 640px) 350px, calc((100vw - 2.75rem) / 2)';
+
 export default function GalleryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const linkRefs = useRef(new Map());
@@ -108,11 +116,14 @@ export default function GalleryPage() {
               }}
             >
               <img
-                src={photo.src}
+                src={toThumbSrc(photo.src)}
+                srcSet={`${toThumbSrc(photo.src)} 480w, ${photo.src} ${photo.width}w`}
+                sizes={GRID_SIZES}
                 alt={photo.alt}
                 width={photo.width}
                 height={photo.height}
                 loading={position < EAGER_COUNT ? 'eager' : 'lazy'}
+                fetchPriority={position === 0 ? 'high' : undefined}
                 decoding="async"
                 className={styles.image}
               />
