@@ -1,0 +1,23 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f4f5f7;
+  overflow-wrap: break-word;
+}
+
+a {
+  color: #0b4fb3;
+}
+
+:focus-visible {
+  outline: 3px solid #f2a900;
+  outline-offset: 2px;
+}
