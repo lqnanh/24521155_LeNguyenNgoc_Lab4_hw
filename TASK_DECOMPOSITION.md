@@ -33,3 +33,21 @@
 - [ ] check mobile 375px, bàn phím, lighthouse
 - [x] ghi lỗi AI vô AI_FAILURE_AUDIT.md
 
+## hw3 - esports tribunal (himass, tanvuu)
+- [x] tạo client vite react + react-router, server express + mongoose 8
+- [x] server: connect mongodb, cors, 404 json (chép từ hw2)
+- [ ] model Player vs Appeal + seed Himass, TanVuu
+- [ ] api GET dossiers, GET dossiers/:playerId, GET time
+- [ ] api POST appeal + kiểm tra (sai ra 400, quá hạn ra 409)
+- [ ] thử api bằng curl
+- [ ] client: router layout + nav + trang 404
+- [ ] hook lấy hồ sơ có AbortController
+- [ ] trang hồ sơ /dossier/:playerId dùng dl
+- [ ] ma trận bất cân xứng bằng useMemo
+- [ ] hook useAppealSlaTimer + visibilitychange
+- [ ] FormContext + InputField, lỗi tính lúc render
+- [ ] gửi kháng cáo lên server, lỗi server hiện ra
+- [ ] ShowData sau khi gửi xong
+- [ ] check mobile 375px, bàn phím, lighthouse
+- [ ] ghi lỗi AI vô AI_FAILURE_AUDIT.md
+

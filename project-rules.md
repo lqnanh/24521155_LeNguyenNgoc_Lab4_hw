@@ -54,4 +54,35 @@
 - lỗi gọi api hiện role="alert"
 - màn 375px ko cuộn ngang
 
+## hw3 - esports fair-play appeal tribunal
+### server
+- giống hw2: express 5 + mongoose 8, async/await, thiếu MONGODB_URI thì throw, dùng 127.0.0.1, cors chỉ CLIENT_ORIGIN, route nào cũng try/catch, route ko có thì 404 json
+- db riêng tên hw3
+- model Player (playerId himass/tanvuu, tên, đội, danh sách vi phạm, án phạt, lúc ra án, hạn kháng cáo) vs Appeal
+- api:
+  - GET /api/dossiers -> list cầu thủ (tóm tắt)
+  - GET /api/dossiers/:playerId -> hồ sơ, ko có thì 404
+  - POST /api/dossiers/:playerId/appeals -> 201, sai thì 400 { errors }, quá hạn thì 409
+  - GET /api/time -> { now } để client chỉnh đồng hồ
+- luật kiểm tra đơn kháng cáo ở server giống y client (cùng luật, cùng câu báo lỗi)
+
+### client
+- react-router v7: / , /dossier/:playerId , * (404)
+- playerId sai thì hiện 404 trong trang, role="alert"
+- url server lấy từ import.meta.env.VITE_API_URL
+- lấy hồ sơ bằng hook có AbortController, đổi cầu thủ thì huỷ yêu cầu cũ
+- thông tin hồ sơ dùng <dl> <dt> <dd>
+- ma trận bất cân xứng tính bằng useMemo từ dữ liệu hồ sơ, ko useState, ko useEffect
+- form kháng cáo dùng Context (FormContext + useFormContext)
+- lỗi form tính luôn lúc render từ values, ko useEffect, ko lưu errors vào state
+- ô nào đã rời khỏi hoặc đã bấm gửi thì mới hiện lỗi ô đó
+- input dùng useId, có label, aria-invalid, aria-describedby trỏ tới chỗ báo lỗi
+- gửi xong thì hiện ShowData bằng <dl>
+- useAppealSlaTimer(deadline): mỗi lần tick tính lại còn lại = hạn - giờ hiện tại, ko trừ dần từng giây
+- quay lại tab (visibilitychange) thì hỏi lại giờ server
+- hết hạn thì khoá form, hiện thông báo
+- interval, listener phải dọn khi rời trang
+- lỗi gọi api hiện role="alert"
+- màn 375px ko cuộn ngang
+
 
