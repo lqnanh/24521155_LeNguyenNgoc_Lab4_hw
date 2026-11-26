@@ -30,3 +30,5 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Chưa sửa vì lỗi nhẹ, chỉ tốn thêm 1 yêu cầu nhỏ, không sai dữ liệu.
 - index.css: viền focus màu vàng #f2a900 trên nền trắng chỉ đạt khoảng 1.9:1, dưới mức 3:1 mà WCAG 2.2 AA yêu cầu cho chỉ báo focus.
   Chưa sửa, để bước kiểm tra cuối cùng xử lý (cần một màu nhìn rõ trên cả nền trắng lẫn thanh điều hướng màu tối).
+- computeMatrix.js: án nhẹ hơn vi phạm (chênh lệch âm, vd TanVuu -2) vẫn kết luận là Tương xứng, dễ hiểu nhầm.
+  Chưa sửa vì bảng chỉ dùng để xem án có nặng quá không (phục vụ kháng cáo), cột chênh lệch vẫn ghi rõ "Nhẹ hơn 2 mức".
