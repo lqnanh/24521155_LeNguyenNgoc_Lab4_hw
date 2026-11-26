@@ -1,0 +1,29 @@
+.app {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.message {
+  text-align: center;
+}
+
+.error {
+  margin: 0 auto;
+  max-width: 22rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #fde8e8;
+  color: #9b1c1c;
+  text-align: center;
+}

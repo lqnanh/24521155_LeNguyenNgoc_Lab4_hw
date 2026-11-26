@@ -1,25 +1,23 @@
 import useProfiles from './hooks/useProfiles.js';
+import SwipeDeck from './components/SwipeDeck.jsx';
+import styles from './App.module.css';
 
 export default function App() {
   const { profiles, loading, error } = useProfiles();
 
   return (
-    <main>
-      <h1>Hẹn hò nhưng không yêu</h1>
+    <main className={styles.app}>
+      <h1 className={styles.title}>Hẹn hò nhưng không yêu</h1>
 
-      {loading && <p>Đang tải...</p>}
+      {loading && <p className={styles.message}>Đang tải...</p>}
 
-      {error && <p role="alert">{error}</p>}
-
-      {!loading && !error && (
-        <ul>
-          {profiles.map((profile) => (
-            <li key={profile._id}>
-              {profile.avatar} {profile.name}, {profile.age} tuổi
-            </li>
-          ))}
-        </ul>
+      {error && (
+        <p role="alert" className={styles.error}>
+          {error}
+        </p>
       )}
+
+      {!loading && !error && <SwipeDeck profiles={profiles} />}
     </main>
   );
 }
