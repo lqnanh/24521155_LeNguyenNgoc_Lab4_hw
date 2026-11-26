@@ -25,3 +25,8 @@ Mỗi mục gồm: lỗi là gì (dẫn chứng file/dòng hoặc rule bị vi p
   Sửa: ở bước 12 ghi rõ các lần hoàn tác lúc đang chờ vào undoneWhilePendingRef và đánh dấu ván cũ bằng roundStartRef, không đoán nữa.
 
 ## HW3 - Esports Fair-Play Appeal Tribunal
+
+- Layout.jsx và HomePage.jsx: cả hai cùng gọi useDossierList, ở trang chủ danh sách tuyển thủ bị tải 2 lần từ server.
+  Chưa sửa vì lỗi nhẹ, chỉ tốn thêm 1 yêu cầu nhỏ, không sai dữ liệu.
+- index.css: viền focus màu vàng #f2a900 trên nền trắng chỉ đạt khoảng 1.9:1, dưới mức 3:1 mà WCAG 2.2 AA yêu cầu cho chỉ báo focus.
+  Chưa sửa, để bước kiểm tra cuối cùng xử lý (cần một màu nhìn rõ trên cả nền trắng lẫn thanh điều hướng màu tối).
