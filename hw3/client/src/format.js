@@ -42,3 +42,16 @@ export function formatDate(value) {
 export function formatMoney(value) {
   return typeof value === 'number' ? moneyFormatter.format(value) : '—';
 }
+
+// Thời gian còn lại, ví dụ: "2 ngày 03:12:45" hoặc "00:01:59"
+export function formatCountdown(ms) {
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return '—';
+  const total = Math.max(0, Math.ceil(ms / 1000)); // làm tròn lên: chỉ hiện 00:00:00 khi thật sự hết
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  const clock = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return days > 0 ? `${days} ngày ${clock}` : clock;
+}

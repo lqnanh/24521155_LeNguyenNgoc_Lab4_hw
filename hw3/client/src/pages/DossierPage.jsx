@@ -1,6 +1,10 @@
+import { useMemo } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDossier } from '../hooks/useDossier.js';
+import { computeMatrix } from '../computeMatrix.js';
 import { formatDate, formatDateTime, formatMoney } from '../format.js';
+import DisproportionMatrix from '../components/DisproportionMatrix.jsx';
+import AppealCountdown from '../components/AppealCountdown.jsx';
 import styles from './DossierPage.module.css';
 
 function Row({ label, children }) {
@@ -15,6 +19,12 @@ function Row({ label, children }) {
 export default function DossierPage() {
   const { playerId } = useParams();
   const { dossier, loading, error, notFound } = useDossier(playerId);
+
+  // Hook phải gọi trước mọi lệnh return sớm
+  const matrix = useMemo(
+    () => (dossier ? computeMatrix(dossier.violations, dossier.penalty?.level) : null),
+    [dossier]
+  );
 
   if (loading) {
     return <p role="status">Đang tải hồ sơ…</p>;
@@ -49,6 +59,11 @@ export default function DossierPage() {
     <article className={styles.page}>
       <title>{`Hồ sơ ${dossier.displayName} | Fair-Play Esports`}</title>
       <h1 className={styles.title}>Hồ sơ kỷ luật: {dossier.displayName}</h1>
+
+      <section className={styles.section} aria-labelledby="countdown-heading">
+        <h2 id="countdown-heading">Hạn kháng cáo</h2>
+        <AppealCountdown key={dossier.playerId} deadline={dossier.appealDeadline} />
+      </section>
 
       <section className={styles.section} aria-labelledby="info-heading">
         <h2 id="info-heading">Thông tin tuyển thủ</h2>
@@ -95,6 +110,11 @@ export default function DossierPage() {
             <time dateTime={dossier.appealDeadline}>{formatDateTime(dossier.appealDeadline)}</time>
           </Row>
         </dl>
+      </section>
+
+      <section className={styles.section} aria-labelledby="matrix-heading">
+        <h2 id="matrix-heading">Ma trận bất cân xứng</h2>
+        <DisproportionMatrix matrix={matrix} />
       </section>
     </article>
   );

@@ -1,0 +1,76 @@
+.note {
+  margin: 0 0 0.75rem;
+  color: #3b4252;
+  font-size: 0.95rem;
+}
+
+/* Bảng rộng thì cuộn ngang trong khung này, không làm cả trang bị cuộn */
+.scroller {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #c9ced8;
+  border-radius: 6px;
+}
+
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+}
+
+.caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  background: #eef1f6;
+  color: #1a1a1a;
+}
+
+.table th,
+.table td {
+  padding: 0.6rem 0.75rem;
+  border-top: 1px solid #dde1e8;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  background: #f7f8fa;
+  color: #3b4252;
+  font-size: 0.9rem;
+}
+
+.table tbody th {
+  font-weight: 500;
+}
+
+.table tfoot th,
+.table tfoot td {
+  font-weight: 700;
+  border-top: 2px solid #14213d;
+  background: #f7f8fa;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.PROPORTIONATE {
+  background: #e6f4ea;
+  color: #1e4620;
+}
+
+.SLIGHTLY_HARSH {
+  background: #fff4e0;
+  color: #6b4100;
+}
+
+.TOO_HARSH {
+  background: #fdecea;
+  color: #8a1c14;
+}
