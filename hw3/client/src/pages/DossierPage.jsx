@@ -5,6 +5,7 @@ import { computeMatrix } from '../computeMatrix.js';
 import { formatDate, formatDateTime, formatMoney } from '../format.js';
 import DisproportionMatrix from '../components/DisproportionMatrix.jsx';
 import AppealCountdown from '../components/AppealCountdown.jsx';
+import AppealForm from '../components/AppealForm.jsx';
 import styles from './DossierPage.module.css';
 
 function Row({ label, children }) {
@@ -115,6 +116,11 @@ export default function DossierPage() {
       <section className={styles.section} aria-labelledby="matrix-heading">
         <h2 id="matrix-heading">Ma trận bất cân xứng</h2>
         <DisproportionMatrix matrix={matrix} />
+      </section>
+
+      <section className={styles.section} aria-labelledby="appeal-heading">
+        <h2 id="appeal-heading">Gửi đơn kháng cáo</h2>
+        <AppealForm key={dossier.playerId} playerName={dossier.displayName} />
       </section>
     </article>
   );
