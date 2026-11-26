@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useAppealSlaTimer } from '../hooks/useAppealSlaTimer.js';
 import { formatCountdown } from '../format.js';
 import styles from './AppealCountdown.module.css';
 
@@ -22,8 +21,8 @@ function getStage(remainingMs, isExpired) {
   return 'normal';
 }
 
-export default function AppealCountdown({ deadline }) {
-  const { remainingMs, isExpired } = useAppealSlaTimer(deadline);
+// Nhận kết quả của useAppealSlaTimer từ trang cha (hook chỉ được gọi 1 lần ở DossierPage)
+export default function AppealCountdown({ remainingMs, isExpired }) {
   const stage = getStage(remainingMs, isExpired);
 
   // Chỉ đổi lời thông báo khi mốc thay đổi (không thông báo mốc có sẵn lúc vừa mở trang)

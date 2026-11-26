@@ -123,7 +123,7 @@ export default function InputField({
       )}
 
       {error && (
-        <p id={errorId} className={styles.error}>
+        <p id={errorId} role="alert" className={styles.error}>
           {error}
         </p>
       )}

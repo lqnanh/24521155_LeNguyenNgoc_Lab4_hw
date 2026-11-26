@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDossier } from '../hooks/useDossier.js';
+import { useAppealSlaTimer } from '../hooks/useAppealSlaTimer.js';
 import { computeMatrix } from '../computeMatrix.js';
 import { formatDate, formatDateTime, formatMoney } from '../format.js';
 import DisproportionMatrix from '../components/DisproportionMatrix.jsx';
@@ -21,11 +22,13 @@ export default function DossierPage() {
   const { playerId } = useParams();
   const { dossier, loading, error, notFound } = useDossier(playerId);
 
-  // Hook phải gọi trước mọi lệnh return sớm
+  // Các hook phải gọi trước mọi lệnh return sớm.
+  // Chưa có hồ sơ thì deadline là undefined → hook chưa đếm.
   const matrix = useMemo(
     () => (dossier ? computeMatrix(dossier.violations, dossier.penalty?.level) : null),
     [dossier]
   );
+  const { remainingMs, isExpired } = useAppealSlaTimer(dossier?.appealDeadline);
 
   if (loading) {
     return <p role="status">Đang tải hồ sơ…</p>;
@@ -63,7 +66,7 @@ export default function DossierPage() {
 
       <section className={styles.section} aria-labelledby="countdown-heading">
         <h2 id="countdown-heading">Hạn kháng cáo</h2>
-        <AppealCountdown key={dossier.playerId} deadline={dossier.appealDeadline} />
+        <AppealCountdown key={dossier.playerId} remainingMs={remainingMs} isExpired={isExpired} />
       </section>
 
       <section className={styles.section} aria-labelledby="info-heading">
@@ -119,8 +122,13 @@ export default function DossierPage() {
       </section>
 
       <section className={styles.section} aria-labelledby="appeal-heading">
-        <h2 id="appeal-heading">Gửi đơn kháng cáo</h2>
-        <AppealForm key={dossier.playerId} playerName={dossier.displayName} />
+        <AppealForm
+          key={dossier.playerId}
+          headingId="appeal-heading"
+          playerId={dossier.playerId}
+          playerName={dossier.displayName}
+          isExpired={isExpired}
+        />
       </section>
     </article>
   );
