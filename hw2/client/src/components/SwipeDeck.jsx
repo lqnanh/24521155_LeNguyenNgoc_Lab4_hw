@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Card from './Card.jsx';
+import Summary from './Summary.jsx';
 import { createSwipe, deleteSwipe } from '../api.js';
-import { calculateScore, formatPoints, getPoints } from '../scoring.js';
+import { calculateScore, countByAction, formatPoints, getPoints } from '../scoring.js';
 import styles from './SwipeDeck.module.css';
 
 const KEY_TO_ACTION = {
@@ -83,6 +84,10 @@ function deckReducer(state, command) {
       const swipes = [...state.swipes, entry].sort((a, b) => a.localId - b.localId);
       return { swipes, undoneSwipe: null };
     }
+    case 'reset': {
+      // Chơi lại: chỉ làm mới giao diện, không đụng tới server
+      return initialState;
+    }
     default:
       return state;
   }
@@ -96,12 +101,25 @@ export default function SwipeDeck({ profiles = [] }) {
   const nextLocalIdRef = useRef(1);
   const [error, setError] = useState(null);
 
+  // Những lần quẹt bị hoàn tác khi server chưa trả _id về.
+  // Ghi rõ ra đây, không đoán từ "không tìm thấy trong danh sách".
+  const undoneWhilePendingRef = useRef(new Set());
+
+  // localId nhỏ hơn số này là của ván trước (trước khi bấm "Chơi lại")
+  const roundStartRef = useRef(1);
+  const isOldRound = (localId) => localId < roundStartRef.current;
+
+  const deckRef = useRef(null);
+  const summaryRef = useRef(null);
+
   const { swipes, undoneSwipe } = state;
 
   // Tất cả tính ra mỗi lần vẽ lại, không lưu thành state riêng
   const remainingProfiles = getRemainingProfiles(profiles, swipes);
   const currentProfile = remainingProfiles[0] ?? null;
   const score = calculateScore(swipes);
+  const counts = countByAction(swipes);
+  const isFinished = profiles.length > 0 && currentProfile === null;
 
   const canSwipe = currentProfile !== null;
   const canUndo = swipes.length > 0;
@@ -137,6 +155,8 @@ export default function SwipeDeck({ profiles = [] }) {
         await deleteSwipe(entry.serverId);
       } catch (err) {
         if (err.status === 404) return;
+        // Đã chơi lại rồi thì không đặt lại vào ván mới, không báo lỗi
+        if (isOldRound(entry.localId)) return;
         setError(`Không hoàn tác được. ${err.message}`);
         apply({ type: 'restore', entry });
       }
@@ -158,15 +178,19 @@ export default function SwipeDeck({ profiles = [] }) {
       try {
         const saved = await createSwipe({ profileId: entry.profileId, action });
 
-        if (findEntry(stateRef.current, localId)) {
-          apply({ type: 'saved', localId, serverId: saved._id });
-        } else {
-          // Đã bị hoàn tác trong lúc chờ server: giờ mới có _id thì xoá luôn
+        // 1. Người dùng đã hoàn tác lúc chờ: giờ có _id thì xoá trên server
+        if (undoneWhilePendingRef.current.delete(localId)) {
           deleteOnServer({ ...entry, serverId: saved._id });
+          return;
         }
+        // 2. Đã bấm "Chơi lại": giữ nguyên trên server, không làm gì
+        if (isOldRound(localId)) return;
+        // 3. Bình thường: gắn _id vào đúng lần quẹt
+        apply({ type: 'saved', localId, serverId: saved._id });
       } catch (err) {
-        // Đã hoàn tác rồi thì lỗi này không còn quan trọng
-        if (!findEntry(stateRef.current, localId)) return;
+        // Đã hoàn tác hoặc đã chơi lại: lỗi này không còn quan trọng
+        if (undoneWhilePendingRef.current.delete(localId)) return;
+        if (isOldRound(localId)) return;
         apply({ type: 'remove', localId });
         setError(`Không lưu được lượt quẹt. ${err.message}`);
       }
@@ -178,11 +202,31 @@ export default function SwipeDeck({ profiles = [] }) {
     const top = stateRef.current.swipes.at(-1);
     if (!top) return;
 
+    // Đang đứng trong màn tổng kết (sắp biến mất) thì chuyển focus về bộ thẻ
+    if (summaryRef.current?.contains(document.activeElement)) {
+      deckRef.current?.focus();
+    }
+
     apply({ type: 'undo' }); // thẻ quay lại ngay
 
-    // Có _id rồi thì xoá ngay. Chưa có thì swipe() sẽ tự xoá khi server trả về.
-    if (top.serverId) deleteOnServer(top);
+    if (top.serverId) {
+      deleteOnServer(top);
+    } else {
+      // Chưa có _id: ghi nhớ lại, khi server trả về thì swipe() sẽ xoá
+      undoneWhilePendingRef.current.add(top.localId);
+    }
   }, [apply, deleteOnServer]);
+
+  const restart = useCallback(() => {
+    // Mọi lần quẹt đang chờ từ giờ thuộc "ván cũ"
+    roundStartRef.current = nextLocalIdRef.current;
+
+    // Nút "Chơi lại" sắp biến mất: chuyển focus về bộ thẻ trước
+    deckRef.current?.focus();
+
+    apply({ type: 'reset' });
+    setError(null);
+  }, [apply]);
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -213,7 +257,7 @@ export default function SwipeDeck({ profiles = [] }) {
   }, [swipe, undo]);
 
   return (
-    <section className={styles.deck} aria-label="Bộ thẻ">
+    <section ref={deckRef} tabIndex={-1} className={styles.deck} aria-label="Bộ thẻ">
       {/* Không đặt aria-live ở đây: dòng status bên dưới đã đọc điểm rồi */}
       <p className={styles.score}>
         Điểm: <span className={styles.scoreValue}>{score}</span>
@@ -237,11 +281,17 @@ export default function SwipeDeck({ profiles = [] }) {
         </div>
       )}
 
-      {currentProfile ? (
+      {currentProfile && (
         <Card key={currentProfile._id} profile={currentProfile} onSwipe={swipe} />
-      ) : (
-        <p className={styles.empty}>Hết người để quẹt rồi! 🎉</p>
       )}
+
+      {isFinished && (
+        <div ref={summaryRef}>
+          <Summary score={score} counts={counts} onRestart={restart} />
+        </div>
+      )}
+
+      {profiles.length === 0 && <p className={styles.empty}>Chưa có ai để quẹt.</p>}
 
       <div className={styles.actions}>
         <button

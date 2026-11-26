@@ -8,6 +8,11 @@
   gap: 1rem;
 }
 
+/* Focus do code đặt vào (sau khi chơi lại), không cần viền */
+.deck:focus {
+  outline: none;
+}
+
 /* Điểm ở trên thẻ */
 .score {
   margin: 0;
